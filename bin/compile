@@ -1,29 +1,51 @@
 #!/usr/bin/env bash
-indent() {
-    sed -u 's/^/      /'
-}
+set -o errexit
+set -o errtrace
+set -o nounset
+set -o pipefail
+set -o verbose
+set -o xtrace
 
-BUILD_DIR="$1"
-CACHE_DIR="$2"
-ENV_DIR="$3"
+BUILD_DIR="${1}"
+CACHE_DIR="${2}"
+ENV_DIR="${3}"
 STAGE="$(mktemp -d)"
 
-if [ ! -f "${ENV_DIR}/APP_BASE" ]; then
-    echo "APP_BASE was not set. Aborting" | indent
-    exit 1
-fi
+[[ -f "${ENV_DIR}/APP_BASE" ]] || {
+	echo -e >&2 "\tAPP_BASE was not set. Aborting"
+	exit 1
+}
+
 APP_BASE="$(cat "${ENV_DIR}/APP_BASE")"
 
+[[ -f "${APP_BASE}/Procfile" ]] || {
+  echo -e >&2 "\tNo Procfile found in ${APP_BASE}"
+  exit 1
+}
+
 (
-    mv "${BUILD_DIR}/${APP_BASE}" "${STAGE}" &&
-    rm -rf "${BUILD_DIR}" &&
-    mv "${STAGE}/$(basename "$APP_BASE")" "${BUILD_DIR}"
-)
 
-if [ $? -ne 0 ]; then
-    echo "FAILED to copy directory into place" | indent
-    exit 1
-fi
+	cd "${BUILD_DIR}"
 
-echo "Copied ${APP_BASE} to root of app successfully" | indent
+	# Replace symlinks with the link-target.
+	find "${APP_BASE}" -type l \
+	| while read link; do (
+		cd "$(dirname "${link}")"
+		file="$(basename "${link}")"
+		rm -f "${file}"
+		mv "$(readlink "${file}")" .
+	); done
 
+	# Replace the build folder with the app.
+	mv "${APP_BASE}" "${STAGE}"
+	rm -rf "${BUILD_DIR}"
+	mv "${STAGE}/$(basename "$APP_BASE")" "${BUILD_DIR}"
+
+) || {
+
+	echo -e >&2 "\tFAILED to copy directory into place"
+	exit 1
+
+}
+
+echo -e "\tCopied ${APP_BASE} to root of app successfully"
