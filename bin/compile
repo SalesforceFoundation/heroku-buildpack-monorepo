@@ -48,6 +48,7 @@ APP_BASE="$(cat "${ENV_DIR}/APP_BASE")"
 	rm -rf "${BUILD_DIR}"
 	mv "${STAGE}/$(basename "$APP_BASE")" "${BUILD_DIR}"
 
+	ls -la
 ) || {
 
 	echo -e >&2 "\tFAILED to copy directory into place"
@@ -56,3 +57,5 @@ APP_BASE="$(cat "${ENV_DIR}/APP_BASE")"
 }
 
 echo -e "\tCopied ${APP_BASE} to root of app successfully"
+
+exit 0
