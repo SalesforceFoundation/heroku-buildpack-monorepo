@@ -36,8 +36,9 @@ APP_BASE="$(cat "${ENV_DIR}/APP_BASE")"
 	| while read link; do (
 		cd "$(dirname "${link}")"
 		file="$(basename "${link}")"
+		target="$(readlink "${file}")"
 		rm -f "${file}"
-		mv "$(readlink "${file}")" .
+		mv "${target}" .
 	); done
 
 	# Replace the build folder with the app.
