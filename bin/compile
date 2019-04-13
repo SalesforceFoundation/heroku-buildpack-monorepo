@@ -22,7 +22,7 @@ ls -la
 
 APP_BASE="$(cat "${ENV_DIR}/APP_BASE")"
 
-[[ -f "${ENV_DIR}/${APP_BASE}/Procfile" ]] || {
+[[ -f "${BUILD_DIR}/${APP_BASE}/Procfile" ]] || {
   echo -e >&2 "\tNo Procfile found in ${APP_BASE}"
   exit 1
 }
