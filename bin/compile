@@ -11,6 +11,10 @@ CACHE_DIR="${2}"
 ENV_DIR="${3}"
 STAGE="$(mktemp -d)"
 
+set
+pwd
+ls -la
+
 [[ -f "${ENV_DIR}/APP_BASE" ]] || {
 	echo -e >&2 "\tAPP_BASE was not set. Aborting"
 	exit 1
@@ -18,7 +22,7 @@ STAGE="$(mktemp -d)"
 
 APP_BASE="$(cat "${ENV_DIR}/APP_BASE")"
 
-[[ -f "${APP_BASE}/Procfile" ]] || {
+[[ -f "${ENV_DIR}/${APP_BASE}/Procfile" ]] || {
   echo -e >&2 "\tNo Procfile found in ${APP_BASE}"
   exit 1
 }
